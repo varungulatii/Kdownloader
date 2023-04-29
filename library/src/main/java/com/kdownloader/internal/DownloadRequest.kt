@@ -23,9 +23,6 @@ class DownloadRequest private constructor(
     var totalBytes: Long = 0
     var downloadedBytes: Long = 0
 
-    private val readTimeout = 0
-    private val connectTimeout = 0
-
     data class Builder(
         private val url: String, private val dirPath: String, private val fileName: String
     ) {

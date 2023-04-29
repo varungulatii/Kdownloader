@@ -17,17 +17,21 @@ class DefaultHttpClient : HttpClient {
 
     @Throws(IOException::class)
     override fun connect(req: DownloadRequest) {
-        connection = URL(req.url).openConnection()
-        connection?.readTimeout = req.readTimeOut
-        connection?.connectTimeout = req.connectTimeOut
         val range: String = java.lang.String.format(
             Locale.ENGLISH,
             "bytes=%d-", req.downloadedBytes
         )
-        connection!!.addRequestProperty(Constants.RANGE, range)
-        connection!!.addRequestProperty(Constants.USER_AGENT, req.userAgent)
-        addHeaders(req)
-        connection!!.connect()
+
+        connection = URL(req.url).openConnection()
+        connection?.let {
+            it.readTimeout = req.readTimeOut
+            it.connectTimeout = req.connectTimeOut
+
+            it.addRequestProperty(Constants.RANGE, range)
+            it.addRequestProperty(Constants.USER_AGENT, req.userAgent)
+            addHeaders(req)
+            it.connect()
+        }
     }
 
     @Throws(IOException::class)
@@ -41,16 +45,16 @@ class DefaultHttpClient : HttpClient {
 
     @Throws(IOException::class)
     override fun getInputStream(): InputStream? {
-        return connection!!.getInputStream()
+        return connection?.getInputStream()
     }
 
     override fun getContentLength(): Long {
-        val length: String? = connection!!.getHeaderField("Content-Length")
+        val length: String? = connection?.getHeaderField("Content-Length")
         return length?.toLong() ?: -1
     }
 
-    override fun getResponseHeader(name: String): String? {
-        return connection!!.getHeaderField(name)
+    override fun getResponseHeader(name: String): String {
+        return connection?.getHeaderField(name) ?: ""
     }
 
     override fun close() {
@@ -58,7 +62,7 @@ class DefaultHttpClient : HttpClient {
     }
 
     override fun getHeaderFields(): Map<String, List<String>> {
-        return connection!!.headerFields
+        return connection?.headerFields ?: emptyMap()
     }
 
     override fun getErrorStream(): InputStream? {
@@ -73,7 +77,7 @@ class DefaultHttpClient : HttpClient {
             val entries: Set<Map.Entry<String, List<String>>> = headers.entries
             for ((name, list) in entries) {
                 for (value in list) {
-                    connection!!.addRequestProperty(name, value)
+                    connection?.addRequestProperty(name, value)
                 }
             }
         }

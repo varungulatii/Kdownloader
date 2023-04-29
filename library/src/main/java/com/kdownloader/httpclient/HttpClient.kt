@@ -4,7 +4,6 @@ import com.kdownloader.internal.DownloadRequest
 import java.io.IOException
 import java.io.InputStream
 
-
 interface HttpClient : Cloneable {
 
     fun getContentLength(): Long
@@ -24,7 +23,7 @@ interface HttpClient : Cloneable {
     @Throws(IOException::class)
     fun connect(req: DownloadRequest)
 
-    fun getResponseHeader(name: String): String?
+    fun getResponseHeader(name: String): String
 
     fun close()
 

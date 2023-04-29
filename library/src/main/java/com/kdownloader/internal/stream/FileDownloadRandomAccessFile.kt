@@ -1,4 +1,4 @@
-package com.library.internal.stream
+package com.kdownloader.internal.stream
 
 import java.io.*
 

@@ -1,13 +1,20 @@
 package com.kdownloader.internal
 
 import com.kdownloader.Status
+import com.kdownloader.database.DbHelper
+import com.kdownloader.database.DownloadModel
 import com.kdownloader.utils.getTempPath
 import kotlinx.coroutines.*
 import java.io.File
 
-class DownloadDispatchers() {
+class DownloadDispatchers(private val dbHelper: DbHelper) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main +
+            CoroutineExceptionHandler { _, _ ->
+
+            })
+
+    private val dbScope = CoroutineScope(SupervisorJob() + Dispatchers.IO +
             CoroutineExceptionHandler { _, _ ->
 
             })
@@ -21,7 +28,7 @@ class DownloadDispatchers() {
     }
 
     private suspend fun execute(request: DownloadRequest) {
-        DownloadTask(request).run(
+        DownloadTask(request, dbHelper).run(
             onStart = {
                 executeOnMainThread { request.listener?.onStart() }
             },
@@ -57,9 +64,35 @@ class DownloadDispatchers() {
         }
 
         req.status = Status.CANCELLED
+
+        dbScope.launch {
+            dbHelper.remove(req.downloadId)
+        }
     }
 
     fun cancelAll() {
         scope.cancel()
+        dbScope.launch {
+            dbHelper.empty()
+        }
+    }
+
+    fun cleanup(days: Int) {
+        dbScope.launch {
+            val models: List<DownloadModel>? = dbHelper.getUnwantedModels(days)
+            if (models != null) {
+                for (model in models) {
+                    val tempPath: String = getTempPath(
+                        model.dirPath,
+                        model.fileName
+                    )
+                    dbHelper.remove(model.id)
+                    val file = File(tempPath)
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                }
+            }
+        }
     }
 }

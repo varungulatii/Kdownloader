@@ -1,6 +1,10 @@
 package com.kdownloader.internal
 
+import com.kdownloader.Constants
 import com.kdownloader.Status
+import com.kdownloader.database.AppDbHelper
+import com.kdownloader.database.DbHelper
+import com.kdownloader.database.DownloadModel
 import com.kdownloader.httpclient.DefaultHttpClient
 import com.kdownloader.httpclient.HttpClient
 import com.kdownloader.internal.stream.FileDownloadOutputStream
@@ -9,16 +13,15 @@ import com.kdownloader.utils.getPath
 import com.kdownloader.utils.getRedirectedConnectionIfAny
 import com.kdownloader.utils.getTempPath
 import com.kdownloader.utils.renameFileName
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 
 class DownloadTask(
-    private val req: DownloadRequest
+    private val req: DownloadRequest,
+    private val dbHelper: DbHelper
 ) {
 
     private var responseCode = 0
@@ -32,6 +35,13 @@ class DownloadTask(
 
     private var lastSyncTime: Long = 0
     private var lastSyncBytes: Long = 0
+
+    private var eTag: String = ""
+
+    private val dbScope = CoroutineScope(SupervisorJob() + Dispatchers.IO +
+            CoroutineExceptionHandler { _, _ ->
+
+            })
 
     companion object {
         private const val TIME_GAP_FOR_SYNC: Long = 2000
@@ -54,12 +64,53 @@ class DownloadTask(
         override fun onCompleted() = onCompleted()
     })
 
+    private suspend fun createAndInsertNewModel() {
+
+        dbScope.launch {
+            dbHelper.insert(
+                DownloadModel(
+                    id = req.downloadId,
+                    url = req.url,
+                    totalBytes = req.totalBytes,
+                    eTag = eTag
+                )
+            )
+        }
+    }
+
+    private suspend fun removeNoMoreNeededModelFromDatabase() {
+        dbScope.launch {
+            dbHelper.remove(req.downloadId)
+        }
+    }
+
     suspend fun run(listener: DownloadRequest.Listener) {
 
         withContext(Dispatchers.IO) {
             try {
                 tempPath = getTempPath(req.dirPath, req.fileName)
-                val file = File(tempPath)
+                var file = File(tempPath)
+
+                var model = getDownloadModelIfAlreadyPresentInDatabase()
+
+                if (model == null && file.exists() && dbHelper is AppDbHelper) {
+                    if(!deleteTempFile()){
+                        tempPath = tempPath.split(".")[0] + "2." + tempPath.split(".", limit = 2)[1]
+                        file = File(tempPath)
+                    }
+                }
+
+                if (model != null) {
+                    if (file.exists()) {
+                        req.totalBytes = (model.totalBytes)
+                        req.downloadedBytes = (model.downloadedBytes)
+                    } else {
+                        removeNoMoreNeededModelFromDatabase()
+                        req.downloadedBytes = 0
+                        req.totalBytes = 0
+                        model = null
+                    }
+                }
 
                 // use the url to download the file with HTTP Client
                 httpClient = DefaultHttpClient().clone()
@@ -69,6 +120,12 @@ class DownloadTask(
                 listener.onStart()
 
                 httpClient.connect(req)
+
+                eTag = httpClient.getResponseHeader(Constants.ETAG)
+
+                if (checkIfFreshStartRequiredAndStart(model)) {
+                    model = null
+                }
 
                 httpClient = getRedirectedConnectionIfAny(httpClient, req)
                 responseCode = httpClient.getResponseCode()
@@ -89,6 +146,10 @@ class DownloadTask(
                 if (totalBytes == 0L) {
                     totalBytes = httpClient.getContentLength()
                     req.totalBytes = (totalBytes)
+                }
+
+                if (isResumeSupported && model == null) {
+                    createAndInsertNewModel()
                 }
 
                 inputStream = httpClient.getInputStream()
@@ -198,7 +259,36 @@ class DownloadTask(
         return false
     }
 
-    private fun closeAllSafely(outputStream: FileDownloadOutputStream) {
+    @Throws(IOException::class, IllegalAccessException::class)
+    private suspend fun checkIfFreshStartRequiredAndStart(model: DownloadModel?): Boolean {
+        if (responseCode == Constants.HTTP_RANGE_NOT_SATISFIABLE || isETagChanged(model)) {
+            if (model != null) {
+                removeNoMoreNeededModelFromDatabase()
+            }
+            deleteTempFile()
+            req.downloadedBytes = 0
+            req.totalBytes = 0
+            httpClient = DefaultHttpClient().clone()
+            httpClient.connect(req)
+            httpClient = getRedirectedConnectionIfAny(httpClient, req)
+            responseCode = httpClient.getResponseCode()
+            return true
+        }
+        return false
+    }
+
+    private fun isETagChanged(model: DownloadModel?): Boolean {
+        return (!(eTag.isEmpty() || model == null || model.eTag.isEmpty())
+                && model.eTag != eTag)
+    }
+
+    private suspend fun getDownloadModelIfAlreadyPresentInDatabase(): DownloadModel? {
+        return withContext(Dispatchers.IO) {
+            dbHelper.find(req.downloadId)
+        }
+    }
+
+    private suspend fun closeAllSafely(outputStream: FileDownloadOutputStream) {
 
         try {
             httpClient.close()
@@ -216,17 +306,19 @@ class DownloadTask(
             sync(outputStream)
         } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
+        }
 
-            try {
-                outputStream.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+        finally {
+            if (outputStream != null)
+                try {
+                    outputStream.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
         }
     }
 
-    private fun syncIfRequired(outputStream: FileDownloadOutputStream) {
+    private suspend fun syncIfRequired(outputStream: FileDownloadOutputStream) {
         val currentBytes: Long = req.downloadedBytes
         val currentTime = System.currentTimeMillis()
         val bytesDelta: Long = currentBytes - lastSyncBytes
@@ -238,11 +330,22 @@ class DownloadTask(
         }
     }
 
-    private fun sync(outputStream: FileDownloadOutputStream) {
+    private suspend fun sync(outputStream: FileDownloadOutputStream) {
+        var success: Boolean
         try {
             outputStream.flushAndSync()
+            success = true
         } catch (e: IOException) {
+            success = false
             e.printStackTrace()
+        }
+        if (success && isResumeSupported) {
+            dbHelper
+                .updateProgress(
+                    req.downloadId,
+                    req.downloadedBytes,
+                    System.currentTimeMillis()
+                )
         }
     }
 

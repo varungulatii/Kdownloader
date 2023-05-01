@@ -223,8 +223,11 @@ class DownloadTask(
                         syncIfRequired(outputStream)
                     }
 
-                    listener.onProgress(((req.downloadedBytes * 100) / totalBytes).toInt())
-
+                    var progress = 0
+                    if (totalBytes > 0) {
+                        progress = ((req.downloadedBytes * 100) / totalBytes).toInt()
+                    }
+                    listener.onProgress(progress)
                 } while (true)
 
                 if (req.status === Status.CANCELLED) {
@@ -249,7 +252,7 @@ class DownloadTask(
                 req.status = Status.FAILED
                 listener.onError(e.toString())
                 return@withContext
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 if (!isResumeSupported) {
                     deleteTempFile()
                     req.reset()

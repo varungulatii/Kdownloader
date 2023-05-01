@@ -55,9 +55,6 @@ class DownloadDispatchers(private val dbHelper: DbHelper) {
 
     fun cancel(req: DownloadRequest) {
 
-        req.status = Status.CANCELLED
-        req.job.cancel()
-
         if (req.status == Status.PAUSED) {
             val tempPath = getTempPath(req.dirPath, req.fileName)
             val file = File(tempPath)
@@ -66,6 +63,10 @@ class DownloadDispatchers(private val dbHelper: DbHelper) {
             }
             req.reset()
         }
+
+        req.status = Status.CANCELLED
+        req.job.cancel()
+
         req.listener?.onError("Cancelled")
 
         dbScope.launch {

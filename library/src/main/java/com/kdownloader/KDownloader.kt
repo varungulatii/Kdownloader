@@ -39,11 +39,13 @@ class KDownloader private constructor(dbHelper: DbHelper) {
         req: DownloadRequest,
         crossinline onStart: () -> Unit = {},
         crossinline onProgress: (value: Int) -> Unit = { _ -> },
+        crossinline onPause: () -> Unit = {},
         crossinline onError: (error: String) -> Unit = { _ -> },
         crossinline onCompleted: () -> Unit = {}
     ) = enqueue(req, object : DownloadRequest.Listener {
         override fun onStart() = onStart()
         override fun onProgress(value: Int) = onProgress(value)
+        override fun onPause() = onPause()
         override fun onError(error: String) = onError(error)
         override fun onCompleted() = onCompleted()
     })

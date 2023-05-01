@@ -14,7 +14,6 @@ class DownloadRequest private constructor(
     internal val downloadId: Int,
     internal val fileName: String,
     internal var status: Status = Status.UNKNOWN,
-    internal var job: Job = Job(),
     internal var readTimeOut: Int = 0,
     internal var connectTimeOut: Int = 0,
     internal var userAgent: String = Constants.DEFAULT_USER_AGENT
@@ -22,6 +21,7 @@ class DownloadRequest private constructor(
 
     var totalBytes: Long = 0
     var downloadedBytes: Long = 0
+    internal lateinit var job: Job
 
     data class Builder(
         private val url: String, private val dirPath: String, private val fileName: String
@@ -71,15 +71,17 @@ class DownloadRequest private constructor(
     }
 
     interface Listener {
-
         fun onStart()
-
         fun onProgress(value: Int)
-
-        fun onError(error: String)
-
+        fun onPause()
         fun onCompleted()
+        fun onError(error: String)
+    }
 
+    fun reset(){
+        downloadedBytes = 0
+        totalBytes = 0
+        status = Status.UNKNOWN
     }
 
 }

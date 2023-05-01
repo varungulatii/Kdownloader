@@ -53,7 +53,8 @@ class DownloadTask(
         crossinline onStart: () -> Unit = {},
         crossinline onProgress: (value: Int) -> Unit = { _ -> },
         crossinline onError: (error: String) -> Unit = { _ -> },
-        crossinline onCompleted: () -> Unit = {}
+        crossinline onCompleted: () -> Unit = {},
+        crossinline onPause: () -> Unit = {}
     ) = run(object : DownloadRequest.Listener {
         override fun onStart() = onStart()
 
@@ -62,6 +63,8 @@ class DownloadTask(
         override fun onError(error: String) = onError(error)
 
         override fun onCompleted() = onCompleted()
+
+        override fun onPause() = onPause()
     })
 
     private suspend fun createAndInsertNewModel() {
@@ -94,7 +97,7 @@ class DownloadTask(
                 var model = getDownloadModelIfAlreadyPresentInDatabase()
 
                 if (model == null && file.exists() && dbHelper is AppDbHelper) {
-                    if(!deleteTempFile()){
+                    if (!deleteTempFile()) {
                         tempPath = tempPath.split(".")[0] + "2." + tempPath.split(".", limit = 2)[1]
                         file = File(tempPath)
                     }
@@ -174,9 +177,12 @@ class DownloadTask(
 
                 if (req.status === Status.CANCELLED) {
                     deleteTempFile()
+                    req.reset()
+                    listener.onError("Cancelled")
                     return@withContext
                 } else if (req.status === Status.PAUSED) {
                     sync(outputStream)
+                    listener.onPause()
                     return@withContext
                 }
 
@@ -192,16 +198,23 @@ class DownloadTask(
 
                     if (req.status === Status.CANCELLED) {
                         deleteTempFile()
+                        req.reset()
+                        listener.onError("Cancelled")
                         return@withContext
                     } else if (req.status === Status.PAUSED) {
                         sync(outputStream)
+                        listener.onPause()
                         return@withContext
                     }
 
                     if (!isActive) {
+                        deleteTempFile()
+                        req.reset()
                         break
                     }
                     if (!req.job.isActive) {
+                        deleteTempFile()
+                        req.reset()
                         break
                     }
                     outputStream.write(buff, 0, byteCount)
@@ -216,9 +229,12 @@ class DownloadTask(
 
                 if (req.status === Status.CANCELLED) {
                     deleteTempFile()
+                    req.reset()
+                    listener.onError("Cancelled")
                     return@withContext
                 } else if (req.status === Status.PAUSED) {
                     sync(outputStream)
+                    listener.onPause()
                     return@withContext
                 }
 
@@ -227,16 +243,16 @@ class DownloadTask(
                 listener.onCompleted()
                 req.status = Status.COMPLETED
                 return@withContext
-            } catch (e: IllegalAccessException) {
-                if (!isResumeSupported) {
-                    deleteTempFile()
-                }
-                listener.onError(e.toString())
+            } catch (e: CancellationException) {
+                deleteTempFile()
+                req.reset()
                 req.status = Status.FAILED
+                listener.onError(e.toString())
                 return@withContext
-            } catch (e: IOException) {
+            }catch (e: Exception) {
                 if (!isResumeSupported) {
                     deleteTempFile()
+                    req.reset()
                 }
                 req.status = Status.FAILED
                 listener.onError(e.toString())
@@ -306,15 +322,13 @@ class DownloadTask(
             sync(outputStream)
         } catch (e: Exception) {
             e.printStackTrace()
-        }
+        } finally {
 
-        finally {
-            if (outputStream != null)
-                try {
-                    outputStream.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
+            try {
+                outputStream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
         }
     }
 

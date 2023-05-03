@@ -9,7 +9,7 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        kDownloader = KDownloader.create(this)
+        kDownloader = KDownloader.create(applicationContext)
     }
 
 }

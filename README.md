@@ -21,12 +21,12 @@ Update your settings.gradle file with the following dependency.
 
 ```
 dependencyResolutionManagement {
-repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-repositories {
-google()
-mavenCentral()
-maven { url 'https://jitpack.io' } // this one
-}
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' } // this one
+    }
 }
 ```
 
@@ -34,7 +34,7 @@ Update your module level build.gradle file with the following dependency.
 
 ```
 dependencies {
-implementation 'com.github.varungulatii:Kdownloader:1.0.3'
+    implementation 'com.github.varungulatii:Kdownloader:1.0.3'
 }
 ```
 Do not forget to add internet permission in manifest if already not present
@@ -52,8 +52,22 @@ Then use it in your activity as :
 
 ```
 kDownloader = (applicationContext as MyApplication).kDownloader
-val request = kDownloader.newRequestBuilder(url, dirPath, fileName,).tag("TAG").build()
-downloadId = kDownloader.enqueue(request1, onStart = {}, onProgress = {}, onCompleted = {}, onError = {}, onPause = {})
+val request = kDownloader
+    .newRequestBuilder(url, dirPath, fileName,)
+    .tag("TAG")
+    .build()
+downloadId = kDownloader.enqueue(request1, 
+    onStart = {
+    }, 
+    onProgress = {
+    }, 
+    onCompleted = {
+    }, 
+    onError = {
+    }, 
+    onPause = {
+    }
+)
 ```
 
 Pause a download request :

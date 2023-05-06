@@ -10,7 +10,7 @@ Overview of Kdownloader library
 * Supports large file download.
 * This downloader library has a simple interface to make download request.
 * We can check if the status of downloading with the given download Id.
-* PRDownloader gives callbacks for everything like onProgress, onCancel, onStart, onError and etc while downloading a file.
+* Kdownloader gives callbacks for everything like onProgress, onCancel, onStart, onError and etc while downloading a file.
 * Supports proper request canceling.
 * Many requests can be made in parallel.
 * All types of customization are possible.
@@ -81,7 +81,7 @@ Kdownloader.cancelAll();
 Clean up resumed files if database enabled
 ```
 // Method to clean up temporary resumed files which is older than the given day
-PRDownloader.cleanUp(days);
+KDownloader.cleanUp(days);
 ```
 
 TODO

@@ -34,7 +34,7 @@ Update your module level build.gradle file with the following dependency.
 
 ```
 dependencies {
-implementation 'com.github.varungulatii:Kdownloader:1.0.0'
+implementation 'com.github.varungulatii:Kdownloader:1.0.3'
 }
 ```
 Do not forget to add internet permission in manifest if already not present

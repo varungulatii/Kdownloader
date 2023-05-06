@@ -81,7 +81,7 @@ Kdownloader.cancelAll();
 Clean up resumed files if database enabled
 ```
 // Method to clean up temporary resumed files which is older than the given day
-KDownloader.cleanUp(days);
+Kdownloader.cleanUp(days);
 ```
 
 TODO

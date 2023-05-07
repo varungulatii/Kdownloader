@@ -1,8 +1,7 @@
 # Kdownloader
 ### Kdownloader - A file downloader library for Android with pause and resume support
 
-
-![1](https://user-images.githubusercontent.com/14194334/235831553-e71dbacf-7f18-499f-bd62-76cfeba37df1.png)
+![1](https://user-images.githubusercontent.com/14194334/236659163-0d3f17a6-99ea-4b38-aec9-36ce93bb006d.png)
 
 Overview of Kdownloader library
 * Kdownloader can be used to download any type of files like image, video, pdf, apk and etc.

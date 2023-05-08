@@ -14,11 +14,13 @@ Overview of Kdownloader library
 * Many requests can be made in parallel.
 * All types of customization are possible.
 
+![sample_app2-min](https://user-images.githubusercontent.com/14194334/236852098-406eeb27-f036-42bf-aab4-74eb4492f4d8.png)
+
 ## Using Kdownloader Library in your Android application
 
 Update your settings.gradle file with the following dependency.
 
-```
+```groovy
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -31,7 +33,7 @@ dependencyResolutionManagement {
 
 Update your module level build.gradle file with the following dependency.
 
-```
+```groovy
 dependencies {
     implementation 'com.github.varungulatii:Kdownloader:1.0.3'
 }
@@ -43,13 +45,13 @@ Do not forget to add internet permission in manifest if already not present
 ```
 
 Then initialize it in onCreate() Method of application class :
-```
+```kotlin
 kDownloader = KDownloader.create(applicationContext)
 ```
 
 Then use it in your activity as :
 
-```
+```kotlin
 kDownloader = (applicationContext as MyApplication).kDownloader
 val request = kDownloader
     .newRequestBuilder(url, dirPath, fileName,)
@@ -71,16 +73,16 @@ downloadId = kDownloader.enqueue(request1,
 
 Pause a download request :
 
-```
+```kotlin
 Kdownloader.pause(downloadId);
 ```
 Resume a download request
-```
+```kotlin
 Kdownloader.resume(downloadId);
 ```
 
 Cancel a download request
-```
+```kotlin
 // Cancel with the download id
 Kdownloader.cancel(downloadId);
 
@@ -92,7 +94,7 @@ Kdownloader.cancelAll();
 ```
 
 Clean up resumed files if database enabled
-```
+```kotlin
 // Method to clean up temporary resumed files which is older than the given day
 Kdownloader.cleanUp(days);
 ```

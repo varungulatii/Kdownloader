@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         ).tag(TAG + "2").build()
 
         val request3 = kDownloader.newRequestBuilder(
-            "https://file-examples.com/storage/fe644084cb644d3709528c4/2017/10/file-example_PDF_1MB.pdf", dirPath, "docu.pdf",
+            "https://file-examples.com/storage/fe3286c49f6458f86eb9ed5/2017/10/file-example_PDF_1MB.pdf", dirPath, "docu.pdf",
         ).tag(TAG + "3").build()
 
         val request4 = kDownloader.newRequestBuilder(
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         ).tag(TAG + "5").build()
 
         val request6 = kDownloader.newRequestBuilder(
-            "https://file-examples.com/storage/fe644084cb644d3709528c4/2017/11/file_example_MP3_5MG.mp3", dirPath, "music.mp3",
+            "https://file-examples.com/storage/fe3286c49f6458f86eb9ed5/2017/11/file_example_MP3_5MG.mp3", dirPath, "music.mp3",
         ).tag(TAG + "6").build()
 
 

@@ -45,6 +45,9 @@ Do not forget to add internet permission in manifest if already not present
 ```
 
 First of all, we need to create a Kdownloader instance
+```kotlin
+kDownloader = KDownloader.create(applicationContext)
+```
 
 Then use it like this anywhere:
 

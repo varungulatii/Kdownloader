@@ -74,29 +74,29 @@ downloadId = kDownloader.enqueue(request1,
 Pause a download request :
 
 ```kotlin
-Kdownloader.pause(downloadId);
+kDownloader.pause(downloadId);
 ```
 Resume a download request
 ```kotlin
-Kdownloader.resume(downloadId);
+kDownloader.resume(downloadId);
 ```
 
 Cancel a download request
 ```kotlin
 // Cancel with the download id
-Kdownloader.cancel(downloadId);
+kDownloader.cancel(downloadId);
 
 // The tag can be set to any request and then can be used to cancel the request
-Kdownloader.cancel(TAG);
+kDownloader.cancel(TAG);
 
 // Cancel all the requests
-Kdownloader.cancelAll();
+kDownloader.cancelAll();
 ```
 
 Clean up resumed files if database enabled
 ```kotlin
 // Method to clean up temporary resumed files which is older than the given day
-Kdownloader.cleanUp(days);
+kDownloader.cleanUp(days);
 ```
 
 TODO

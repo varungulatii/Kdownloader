@@ -44,15 +44,11 @@ Do not forget to add internet permission in manifest if already not present
 <uses-permission android:name="android.permission.INTERNET" />
 ```
 
-Then initialize it in onCreate() Method of application class :
-```kotlin
-kDownloader = KDownloader.create(applicationContext)
-```
+First of all, we need to create a Kdownloader instance
 
-Then use it in your activity as :
+Then use it like this anywhere:
 
 ```kotlin
-kDownloader = (applicationContext as MyApplication).kDownloader
 val request = kDownloader
     .newRequestBuilder(url, dirPath, fileName,)
     .tag("TAG")

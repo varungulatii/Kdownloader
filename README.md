@@ -104,6 +104,8 @@ kDownloader.cleanUp(days);
 
 *  Download notifications
 
+### If this library helps you in anyway, show your love ❤️ by putting a ⭐ on this project ✌️
+
 ### License
 ```
    Copyright (C) 2022 Varun Gulati

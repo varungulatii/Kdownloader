@@ -3,7 +3,7 @@
 
 ![1](https://user-images.githubusercontent.com/14194334/236659163-0d3f17a6-99ea-4b38-aec9-36ce93bb006d.png)
 
-Overview of Kdownloader library
+### Overview of Kdownloader library
 * Kdownloader can be used to download any type of files like image, video, pdf, apk and etc.
 * This file downloader library supports pause and resume while downloading a file.
 * Supports large file download.
@@ -56,9 +56,11 @@ val request = kDownloader
     .newRequestBuilder(url, dirPath, fileName,)
     .tag("TAG")
     .build()
-downloadId = kDownloader.enqueue(request1, 
+
+// Using all of these lambdas is not mandatory. for example - you can only use onStart or onProgress also
+downloadId = kDownloader.enqueue(request, 
     onStart = {
-    }, 
+    },    
     onProgress = {
     }, 
     onCompleted = {
@@ -70,17 +72,17 @@ downloadId = kDownloader.enqueue(request1,
 )
 ```
 
-Pause a download request :
+### Pause a download request :
 
 ```kotlin
 kDownloader.pause(downloadId);
 ```
-Resume a download request
+### Resume a download request
 ```kotlin
 kDownloader.resume(downloadId);
 ```
 
-Cancel a download request
+### Cancel a download request
 ```kotlin
 // Cancel with the download id
 kDownloader.cancel(downloadId);
@@ -92,18 +94,35 @@ kDownloader.cancel(TAG);
 kDownloader.cancelAll();
 ```
 
-Clean up resumed files if database enabled
+### Clean up resumed files if database enabled
 ```kotlin
 // Method to clean up temporary resumed files which is older than the given day
 kDownloader.cleanUp(days);
 ```
 
-TODO
+### TODO
 
 *  Download notifications
 
+### If this library helps you in anyway, show your love ❤️ by putting a ⭐ on this project ✌️
 
+### License
+```
+   Copyright (C) 2023 Varun Gulati
 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
 
+       http://www.apache.org/licenses/LICENSE-2.0
 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+```
+   
+### Contributing to Kdownloader
 
+All pull requests are welcome, make sure to follow the contribution guidelines when you submit pull request.

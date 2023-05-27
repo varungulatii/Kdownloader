@@ -8,7 +8,7 @@ import com.kdownloader.internal.DownloadDispatchers
 import com.kdownloader.internal.DownloadRequest
 import com.kdownloader.internal.DownloadRequestQueue
 
-class KDownloader private constructor(dbHelper: DbHelper) {
+class KDownloader private constructor(dbHelper: DbHelper, private val config: DownloaderConfig) {
 
     companion object {
         fun create(
@@ -16,9 +16,9 @@ class KDownloader private constructor(dbHelper: DbHelper) {
             config: DownloaderConfig = DownloaderConfig(true)
         ): KDownloader {
             return if (config.databaseEnabled) {
-                KDownloader(AppDbHelper(context))
+                KDownloader(AppDbHelper(context), config)
             } else {
-                KDownloader(NoOpsDbHelper())
+                KDownloader(NoOpsDbHelper(),config)
             }
         }
     }
@@ -28,6 +28,8 @@ class KDownloader private constructor(dbHelper: DbHelper) {
 
     fun newRequestBuilder(url: String, dirPath: String, fileName: String): DownloadRequest.Builder {
         return DownloadRequest.Builder(url, dirPath, fileName)
+            .readTimeout(config.readTimeOut)
+            .connectTimeout(config.connectTimeOut)
     }
 
     fun enqueue(req: DownloadRequest, listener: DownloadRequest.Listener): Int {

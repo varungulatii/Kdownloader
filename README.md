@@ -35,7 +35,7 @@ Update your module level build.gradle file with the following dependency.
 
 ```groovy
 dependencies {
-    implementation 'com.github.varungulatii:Kdownloader:1.0.3'
+    implementation 'com.github.varungulatii:Kdownloader:1.0.4'
 }
 ```
 Do not forget to add internet permission in manifest if already not present

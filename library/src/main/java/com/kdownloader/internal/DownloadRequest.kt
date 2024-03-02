@@ -73,6 +73,7 @@ class DownloadRequest private constructor(
     interface Listener {
         fun onStart()
         fun onProgress(value: Int)
+        fun onProgressBytes(currentBytes: Long, totalBytes: Long)
         fun onPause()
         fun onCompleted()
         fun onError(error: String)

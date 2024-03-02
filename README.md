@@ -62,7 +62,9 @@ downloadId = kDownloader.enqueue(request,
     onStart = {
     },    
     onProgress = {
-    }, 
+    },
+    onProgressBytes = { currentBytes, totalBytes ->
+    },
     onCompleted = {
     }, 
     onError = {

@@ -52,6 +52,7 @@ class DownloadTask(
     suspend inline fun run(
         crossinline onStart: () -> Unit = {},
         crossinline onProgress: (value: Int) -> Unit = { _ -> },
+        crossinline onProgressBytes: (currentBytes: Long, totalBytes: Long) -> Unit = { _, _ -> },
         crossinline onError: (error: String) -> Unit = { _ -> },
         crossinline onCompleted: () -> Unit = {},
         crossinline onPause: () -> Unit = {}
@@ -59,6 +60,8 @@ class DownloadTask(
         override fun onStart() = onStart()
 
         override fun onProgress(value: Int) = onProgress(value)
+
+        override fun onProgressBytes(currentBytes: Long, totalBytes: Long) = onProgressBytes(currentBytes, totalBytes)
 
         override fun onError(error: String) = onError(error)
 
@@ -228,6 +231,7 @@ class DownloadTask(
                         progress = ((req.downloadedBytes * 100) / totalBytes).toInt()
                     }
                     listener.onProgress(progress)
+                    listener.onProgressBytes(req.downloadedBytes, totalBytes)
                 } while (true)
 
                 if (req.status === Status.CANCELLED) {

@@ -41,12 +41,14 @@ class KDownloader private constructor(dbHelper: DbHelper, private val config: Do
         req: DownloadRequest,
         crossinline onStart: () -> Unit = {},
         crossinline onProgress: (value: Int) -> Unit = { _ -> },
+        crossinline onProgressBytes: (currentBytes: Long, totalBytes: Long) -> Unit = { _, _ -> },
         crossinline onPause: () -> Unit = {},
         crossinline onError: (error: String) -> Unit = { _ -> },
         crossinline onCompleted: () -> Unit = {}
     ) = enqueue(req, object : DownloadRequest.Listener {
         override fun onStart() = onStart()
         override fun onProgress(value: Int) = onProgress(value)
+        override fun onProgressBytes(currentBytes: Long, totalBytes: Long) = onProgressBytes(currentBytes, totalBytes)
         override fun onPause() = onPause()
         override fun onError(error: String) = onError(error)
         override fun onCompleted() = onCompleted()

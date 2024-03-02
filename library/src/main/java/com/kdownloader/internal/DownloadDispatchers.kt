@@ -35,6 +35,9 @@ class DownloadDispatchers(private val dbHelper: DbHelper) {
             onProgress = {
                 executeOnMainThread { request.listener?.onProgress(it) }
             },
+            onProgressBytes = { it, it1 ->
+                executeOnMainThread { request.listener?.onProgressBytes(it, it1) }
+            },
             onPause = {
                 executeOnMainThread { request.listener?.onPause() }
             },

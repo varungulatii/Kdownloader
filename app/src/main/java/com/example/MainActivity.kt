@@ -7,6 +7,7 @@ import android.view.View
 import com.example.databinding.ActivityMainBinding
 import com.kdownloader.KDownloader
 import com.kdownloader.Status
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,15 +36,15 @@ class MainActivity : AppCompatActivity() {
         dirPath = Environment.getExternalStorageDirectory().path + "/Download"
 
         val request1 = kDownloader.newRequestBuilder(
-            "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4", dirPath, "bunny.mp4",
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", dirPath, "bunny.mp4",
         ).tag(TAG + "1").build()
 
         val request2 = kDownloader.newRequestBuilder(
-            "https://speed.hetzner.de/100MB.bin", dirPath, "100MB.bin",
+            "https://ash-speed.hetzner.com/100MB.bin", dirPath, "100MB.bin",
         ).tag(TAG + "2").build()
 
         val request3 = kDownloader.newRequestBuilder(
-            "https://file-examples.com/storage/fe3286c49f6458f86eb9ed5/2017/10/file-example_PDF_1MB.pdf", dirPath, "docu.pdf",
+            "https://filesamples.com/samples/document/pdf/sample3.pdf", dirPath, "docu.pdf",
         ).tag(TAG + "3").build()
 
         val request4 = kDownloader.newRequestBuilder(
@@ -51,11 +52,11 @@ class MainActivity : AppCompatActivity() {
         ).tag(TAG + "4").build()
 
         val request5 = kDownloader.newRequestBuilder(
-            "https://speed.hetzner.de/1GB.bin", dirPath, "1GB.bin",
+            "https://ash-speed.hetzner.com/1GB.bin", dirPath, "1GB.bin",
         ).tag(TAG + "5").build()
 
         val request6 = kDownloader.newRequestBuilder(
-            "https://file-examples.com/storage/fe3286c49f6458f86eb9ed5/2017/11/file_example_MP3_5MG.mp3", dirPath, "music.mp3",
+            "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1OMB_MP3.mp3", dirPath, "music.mp3",
         ).tag(TAG + "6").build()
 
 
@@ -77,6 +78,10 @@ class MainActivity : AppCompatActivity() {
                         binding.status1.text = "In Progress"
                         binding.progressBar1.progress = it
                         binding.progressText1.text = "$it%"
+                    },
+                    onProgressBytes = { currentBytes, totalBytes ->
+                        val value = binding.progressText1.text.toString()
+                        binding.progressText1.text = "$value ${getProgressDisplayLine(currentBytes, totalBytes)}"
                     },
                     onCompleted = {
                         binding.status1.text = "Completed"
@@ -127,6 +132,10 @@ class MainActivity : AppCompatActivity() {
                         binding.status2.text = "In Progress"
                         binding.progressBar2.progress = it
                         binding.progressText2.text = "$it%"
+                    },
+                    onProgressBytes = { currentBytes, totalBytes ->
+                        val value = binding.progressText2.text.toString()
+                        binding.progressText2.text = "$value ${getProgressDisplayLine(currentBytes, totalBytes)}"
                     },
                     onCompleted = {
                         binding.status2.text = "Completed"
@@ -181,6 +190,10 @@ class MainActivity : AppCompatActivity() {
                         binding.progressBar3.progress = it
                         binding.progressText3.text = "$it%"
                     },
+                    onProgressBytes = { currentBytes, totalBytes ->
+                        val value = binding.progressText3.text.toString()
+                        binding.progressText3.text = "$value ${getProgressDisplayLine(currentBytes, totalBytes)}"
+                    },
                     onCompleted = {
                         binding.status3.text = "Completed"
                         binding.progressText3.text = "100%"
@@ -233,6 +246,10 @@ class MainActivity : AppCompatActivity() {
                         binding.progressBar4.progress = it
                         binding.progressText4.text = "$it%"
                     },
+                    onProgressBytes = { currentBytes, totalBytes ->
+                        val value = binding.progressText4.text.toString()
+                        binding.progressText4.text = "$value ${getProgressDisplayLine(currentBytes, totalBytes)}"
+                    },
                     onCompleted = {
                         binding.status4.text = "Completed"
                         binding.progressText4.text = "100%"
@@ -283,6 +300,10 @@ class MainActivity : AppCompatActivity() {
                         binding.status5.text = "In Progress"
                         binding.progressBar5.progress = it
                         binding.progressText5.text = "$it%"
+                    },
+                    onProgressBytes = { currentBytes, totalBytes ->
+                        val value = binding.progressText5.text.toString()
+                        binding.progressText5.text = "$value ${getProgressDisplayLine(currentBytes, totalBytes)}"
                     },
                     onCompleted = {
                         binding.status5.text = "Completed"
@@ -336,6 +357,10 @@ class MainActivity : AppCompatActivity() {
                         binding.progressBar6.progress = it
                         binding.progressText6.text = "$it%"
                     },
+                    onProgressBytes = { currentBytes, totalBytes ->
+                        val value = binding.progressText6.text.toString()
+                        binding.progressText6.text = "$value ${getProgressDisplayLine(currentBytes, totalBytes)}"
+                    },
                     onCompleted = {
                         binding.status6.text = "Completed"
                         binding.progressText6.text = "100%"
@@ -365,5 +390,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun getBytesToMBString(bytes: Long): String {
+        return String.format(Locale.ENGLISH, "%.2fMB", bytes / (1024.00 * 1024.00))
+    }
+
+    private fun getProgressDisplayLine(currentBytes: Long, totalBytes: Long): String {
+        return "${getBytesToMBString(currentBytes)} / ${getBytesToMBString(totalBytes)}"
     }
 }
